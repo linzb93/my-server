@@ -1,37 +1,53 @@
-const express = require('express');
+const {Router} = require('express');
 const axios = require('axios');
-const cors = require('cors');
 const {isEmpty} = require('lodash');
-const bodyParser = require('body-parser');
-const app = express();
+const fs = require('fs-extra');
 
-app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.all('/apiagent/**', async (req, res) => {
+const router = Router();
+let agentConfig;
+
+fs.readJSON('./agent.config.json', 'utf8')
+.then(data => {
+  agentConfig = data;
+})
+.catch(e => {
+  console.log(e);
+})
+
+
+Router.all('/**', async (req, res) => {
   let resp;
-  let body = isEmpty(req.body) ? {} : {
+  const projectId = req.originalUrl.split('/')[1];
+  const real_path = req.originalUrl.split('/').slice(2).join('/');
+  const match = agentConfig.filter(item => item.id === projectId);
+  if (!match.length) {
+    res.send({
+      message: '无法跨域，请先配置白名单'
+    });
+    return;
+  }
+  const body = isEmpty(req.body) ? {} : {
     data: JSON.stringify(req.body)
   };
   try {
     resp = await axios({
       method: req.method,
-      url: `https://www.sqgbpx.cn${req.originalUrl.replace('/apiagent', '')}`,
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      url: `${match.prefix}${real_path}`,
+      headers: match.headers || {},
       ...body
     });
   } catch (e) {
-    console.log(e.response.data);
-    res.send({
-      message: '服务器故障'
-    });
+    if (e.response) {
+      res.send(e.response.data);
+    } else {
+      res.send({
+        message: '服务器故障'
+      });
+      console.log(e);
+    }
     return;
   }
   res.send(resp.data)
 })
 
-app.listen(5000, () => {
-  console.log('listen on  port 5000')
-});
+module.exports = router;

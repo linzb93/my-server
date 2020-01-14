@@ -1,0 +1,9 @@
+[
+  {
+    "project": "陕西干部教育培训网",
+    "id": "sx",
+    "prefix": "http://www.sqgbpx.cn/",
+    "headers": ["content-type"],
+    "whitelist": ["http://sxleader.cn"]
+  }
+]
