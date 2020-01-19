@@ -12,17 +12,16 @@ fs.readJSON('./agent.config.json', 'utf8')
 })
 .catch(e => {
   console.log(e);
-})
+});
 
-
-Router.all('/**', async (req, res) => {
+router.all('/**', async (req, res) => {
   let resp;
-  const projectId = req.originalUrl.split('/')[1];
-  const real_path = req.originalUrl.split('/').slice(2).join('/');
+  const projectId = req.originalUrl.split('/')[2];
+  const real_path = `/${req.originalUrl.split('/').slice(3).join('/')}`;
   const match = agentConfig.filter(item => item.id === projectId);
   if (!match.length) {
     res.send({
-      message: '无法跨域，请先配置白名单'
+      message: '项目不存在'
     });
     return;
   }
@@ -31,9 +30,17 @@ Router.all('/**', async (req, res) => {
   };
   try {
     resp = await axios({
-      method: req.method,
-      url: `${match.prefix}${real_path}`,
-      headers: match.headers || {},
+      method: req.method.toUpperCase(),
+      url: `${match[0].prefix}${real_path}`,
+      headers: {
+        'Content-Type': 'application/json',
+        ...match[0].headers ? match[0].headers.reduce((obj, item) => {
+          if (req.get(item)) {
+            obj[item] = req.get(item);
+          }
+          return obj;
+        }, {}) : {}
+      },
       ...body
     });
   } catch (e) {
@@ -47,7 +54,7 @@ Router.all('/**', async (req, res) => {
     }
     return;
   }
-  res.send(resp.data)
+  res.send(resp.data);
 })
 
 module.exports = router;
