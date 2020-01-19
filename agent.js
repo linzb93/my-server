@@ -1,5 +1,6 @@
 const {Router} = require('express');
 const axios = require('axios');
+const path = require('path');
 const {isEmpty} = require('lodash');
 const fs = require('fs-extra');
 
@@ -12,8 +13,7 @@ fs.readJSON('./agent.config.json', 'utf8')
 })
 .catch(e => {
   console.log(e);
-})
-
+});
 
 Router.all('/**', async (req, res) => {
   let resp;
@@ -26,28 +26,50 @@ Router.all('/**', async (req, res) => {
     });
     return;
   }
-  const body = isEmpty(req.body) ? {} : {
-    data: JSON.stringify(req.body)
-  };
-  try {
-    resp = await axios({
-      method: req.method,
-      url: `${match.prefix}${real_path}`,
-      headers: match.headers || {},
-      ...body
-    });
-  } catch (e) {
-    if (e.response) {
-      res.send(e.response.data);
-    } else {
-      res.send({
-        message: '服务器故障'
+  if (path.extname(real_path)) {
+    try {
+      resp = await axios({
+        method: 'get',
+        url: `${match.prefix}${real_path}`,
+        responseType: 'arraybuffer'
       });
-      console.log(e);
+    } catch(e) {
+      if (e.response) {
+        res.send(e.response.data);
+      } else {
+        res.send({
+          message: '服务器故障'
+        });
+        console.log(e);
+      }
+      return;
     }
-    return;
+    res.set(resp.headers);
+    res.send(resp.data);
+  } else {
+    const body = isEmpty(req.body) ? {} : {
+      data: JSON.stringify(req.body)
+    };
+    try {
+      resp = await axios({
+        method: req.method,
+        url: `${match.prefix}${real_path}`,
+        headers: match.headers || {},
+        ...body
+      });
+    } catch (e) {
+      if (e.response) {
+        res.send(e.response.data);
+      } else {
+        res.send({
+          message: '服务器故障'
+        });
+        console.log(e);
+      }
+      return;
+    }
+    res.send(resp.data);
   }
-  res.send(resp.data)
 })
 
 module.exports = router;

@@ -11,5 +11,5 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/apiagent', agentRouter);
 
 app.listen(5000, () => {
-  console.log('listen on  port 5000');
+  console.log('listen on port 5000');
 });
