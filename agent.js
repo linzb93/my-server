@@ -15,14 +15,14 @@ fs.readJSON('./agent.config.json', 'utf8')
   console.log(e);
 });
 
-Router.all('/**', async (req, res) => {
+router.all('/**', async (req, res) => {
   let resp;
-  const projectId = req.originalUrl.split('/')[1];
-  const real_path = req.originalUrl.split('/').slice(2).join('/');
+  const projectId = req.originalUrl.split('/')[2];
+  const real_path = `/${req.originalUrl.split('/').slice(3).join('/')}`;
   const match = agentConfig.filter(item => item.id === projectId);
   if (!match.length) {
     res.send({
-      message: '无法跨域，请先配置白名单'
+      message: '项目不存在'
     });
     return;
   }

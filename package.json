@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "agent": "nodemon agent"
+    "start": "nodemon index",
+    "prod": "node index"
   },
   "author": "",
   "license": "ISC",
@@ -16,5 +17,10 @@
     "fs-extra": "^8.1.0",
     "lodash": "^4.17.15",
     "nodemon": "^2.0.2"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "package.json"
+    ]
   }
 }
