@@ -30,7 +30,7 @@ router.all('/**', async (req, res) => {
     try {
       resp = await axios({
         method: 'get',
-        url: `${match.prefix}${real_path}`,
+        url: `${match[0].prefix}${real_path}`,
         responseType: 'arraybuffer'
       });
     } catch(e) {
@@ -53,8 +53,11 @@ router.all('/**', async (req, res) => {
     try {
       resp = await axios({
         method: req.method,
-        url: `${match.prefix}${real_path}`,
-        headers: match.headers || {},
+        url: `${match[0].prefix}${real_path}`,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(match[0].headers || {})
+        },
         ...body
       });
     } catch (e) {
