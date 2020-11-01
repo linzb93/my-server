@@ -1,0 +1,9 @@
+{
+  "port": 5000,
+  "projects": [
+    {
+      "name": "广告系统",
+      "id": "adSystem"
+    }
+  ]
+}
