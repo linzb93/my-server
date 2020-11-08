@@ -21,3 +21,8 @@ exports.saveFile = async (projectName, filename, buf) => {
   await fs.writeFile(`${cwd}/files/${projectName}/${file}`, buf);
   return `http://localhost:${port}/public/${projectName}/${file}`;
 }
+
+// 删除数据
+exports.deleteData = async (projectName, filename) => {
+  await fs.unlink(`${cwd}/data/${projectName}/${filename}.json`);
+}
